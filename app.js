@@ -13,8 +13,6 @@ app.set('view engine', 'ejs');
 
 //homepage
 app.get('/', function (req, res) {
-    res.send('home');
-});
 
 
 const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
@@ -25,11 +23,14 @@ var formData = {
 
 request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
   if (err) {
-console.trace(err);
-} else {
-  var respBody = JSON.parse(response.body);
-  console.log("result: " + JSON.stringify(respBody));
-}
+    console.trace(err);
+  } else {
+    var respBody = JSON.parse(response.body);
+    console.log("result: " + JSON.stringify(respBody));
+    res.json(JSON.stringify(respBody));
+  }
+});
+ // res.send('home');
 });
 
 //server
