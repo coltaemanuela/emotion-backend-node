@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
 const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
 var formData = {
   apikey: config.empath_API_key,
-  wav: fs.createReadStream("./resources/0wuqx-scsny.wav") //shoulb be less than 8s and  11025 Hz
+  wav: fs.createReadStream("./resources/0wuqx-scsny.wav") //should not be .wav format, should not exceed 5seconds, 1.9MB  and frequency should be 11025 Hz
 };
 
 request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
