@@ -1,0 +1,14 @@
+{
+    "firebase" : {
+        "apiKey": "AIzaSyD2Ch6ki-gZ98roJx7cj6Rcb2-OY4ZM0vo",
+        "authDomain": "city-match.firebaseapp.com",
+        "databaseURL": "https://city-match.firebaseio.com",
+        "projectId": "city-match",
+        "storageBucket": "city-match.appspot.com",
+        "messagingSenderId": "331136100363"
+    },
+    "server" : {
+		    "port" : "3000"
+  },
+    "empath_API_key": "PhaN4uJClU-qlT6-3XPJIp3oJV7kAmXLxfaASakgVXc"
+}

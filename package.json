@@ -1,0 +1,35 @@
+{
+  "name": "emotion-backend",
+  "version": "1.0.0",
+  "description": "identify and represent emotion during speaking",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coltaemanuela/emotion-backend.git"
+  },
+  "keywords": [
+    "emotion",
+    "emoji",
+    "speech-recognition"
+  ],
+  "author": "Emanuela-Felicia Colta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coltaemanuela/emotion-backend/issues"
+  },
+  "homepage": "https://github.com/coltaemanuela/emotion-backend#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "firebase": "^5.0.4",
+    "fs": "0.0.1-security",
+    "google-cloud": "^0.57.0",
+    "nodemon": "^1.17.5",
+    "path": "^0.12.7",
+    "request": "^2.87.0"
+  }
+}
