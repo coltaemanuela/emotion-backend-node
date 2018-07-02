@@ -10,5 +10,7 @@
     "server" : {
 		    "port" : "3000"
   },
-    "empath_API_key": "PhaN4uJClU-qlT6-3XPJIp3oJV7kAmXLxfaASakgVXc"
+    "empath_API_key": "PhaN4uJClU-qlT6-3XPJIp3oJV7kAmXLxfaASakgVXc",
+    "deepaffect_API_key":"Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE",
+    "request_id": "1870d981-3c6f-4fab-9c17-d27939be54c3"
 }

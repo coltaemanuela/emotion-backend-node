@@ -1,8 +1,9 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
-var gcloud = require('google-cloud');
 var fs = require('fs');
+var https = require('https'); 
+var DeepAffects = require('deep-affects');
 var request = require('request');
 var config = require('./config/config.json');
 var app = express();
@@ -13,15 +14,13 @@ app.set('view engine', 'ejs');
 
 //homepage
 app.get('/', function (req, res) {
-
-
-const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
-var formData = {
+  const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
+  var formData = {
   apikey: config.empath_API_key,
   wav: fs.createReadStream("./resources/0wuqx-scsny.wav") //should not be .wav format, should not exceed 5seconds, 1.9MB  and frequency should be 11025 Hz
-};
+  };
 
-request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
+  request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
   if (err) {
     console.trace(err);
   } else {
@@ -29,8 +28,32 @@ request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) 
     console.log("result: " + JSON.stringify(respBody));
     res.json(JSON.stringify(respBody));
   }
+  });
 });
- // res.send('home');
+
+
+app.post('/affects', function(req,res){
+
+  var defaultClient = DeepAffects.ApiClient.instance;
+  // Configure API key authorization: UserSecurity
+  var UserSecurity = defaultClient.authentications['UserSecurity'];
+  UserSecurity.apiKey = config.deepaffect_API_key;
+  var apiInstance = new DeepAffects.EmotionApi();
+  var body = DeepAffects.Audio.fromFile("./resources/0wuqx-scsny.wav"); 
+  var callback = function(error, data, response) {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('API called successfully. Returned data: ' + data);
+      debugger
+    }
+  };
+  // sync request
+  apiInstance.syncRecogniseEmotion(body, callback);
+  
+  // async request
+  webhook = "http://localhost:3000/aff"
+  apiInstance.asyncRecogniseEmotion(body, webhook, callback);
 });
 
 //server
