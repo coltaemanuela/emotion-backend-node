@@ -5,6 +5,7 @@ var fs = require('fs');
 var https = require('https'); 
 var DeepAffects = require('deep-affects');
 var request = require('request');
+var jsonrequest = require('jsonrequest');
 var config = require('./config/config.json');
 var app = express();
 
@@ -32,28 +33,24 @@ app.get('/', function (req, res) {
 });
 
 
-app.post('/affects', function(req,res){
+app.get('/affects', function(req,res){
 
   var defaultClient = DeepAffects.ApiClient.instance;
   // Configure API key authorization: UserSecurity
   var UserSecurity = defaultClient.authentications['UserSecurity'];
   UserSecurity.apiKey = config.deepaffect_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
-  var body = DeepAffects.Audio.fromFile("./resources/0wuqx-scsny.wav"); 
-  var callback = function(error, data, response) {
-    if (error) {
-      console.error(error);
+  var body = DeepAffects.Audio.fromFile("./resources/emma.wav"); 
+  console.log(body, typeof(body))
+
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
+    if (err) {
+      console.error(err);
     } else {
-      console.log('API called successfully. Returned data: ' + data);
-      debugger
+    console.log(data);
     }
-  };
-  // sync request
-  apiInstance.syncRecogniseEmotion(body, callback);
-  
-  // async request
-  webhook = "http://localhost:3000/aff"
-  apiInstance.asyncRecogniseEmotion(body, webhook, callback);
+  });
+
 });
 
 //server
