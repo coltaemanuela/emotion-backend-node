@@ -4,6 +4,8 @@ var path = require('path');
 var fs = require('fs');
 var https = require('https'); 
 var request = require('request');
+var firebase = require('firebase');
+var expressValidator = require('express-validator');
 var rs = require('./service/apiResponse.js');
 var config = require('./config/config.json');
 var general = require('./routes/general');
@@ -16,7 +18,21 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', api)
+app.use(expressValidator({
+  errorFormatter: function (param, msg, value) {
+      var namespace = param.split('.')
+              , root = namespace.shift()
+              , formParam = root;
 
+      while (namespace.length) {
+          formParam += '[' + namespace.shift() + ']';
+      }
+
+      return msg !== "Invalid value" ? msg : "Missing '" + formParam + "' param or no value";
+  }
+}));
+
+firebase.initializeApp(config.firebase);
 //homepage
 app.get('/', function (req, res) {
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
@@ -26,13 +42,11 @@ app.get('/', function (req, res) {
   };
 
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
-  if (err) {
-    console.trace(err);
-  } else {
-    var respBody = JSON.parse(response.body);
-    console.log("result: " + JSON.stringify(respBody));
-    res.json(JSON.stringify(respBody));
-  }
+  if (err) 
+    console.trace(err);  
+  var respBody = JSON.parse(response.body);
+  console.log("result: " + JSON.stringify(respBody));
+  res.json(JSON.stringify(respBody));
   });
 });
 

@@ -2,17 +2,19 @@ var config = require('../config/config.json');
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require("fs");
+var apiResponse = require('../service/apiResponse');
+var expressValidator = require('express-validator');
+const Storage = require('@google-cloud/storage');
 var DeepAffects = require('deep-affects');
 var jsonrequest = require('jsonrequest');
+var firebase = require('firebase');
 var router = express.Router();
 
 //storage initialization
-var storage = gcloud.storage({
+var storage = new Storage ({
     projectId:config.firebase.projectId,
     keyFilename: config.firebase.keyFileName
   });
-var bucket = storage.bucket(config.firebase.storageBucket);
-
 
 router.get('/affects', function(req,res,next){    
     var defaultClient = DeepAffects.ApiClient.instance;
@@ -30,6 +32,18 @@ router.get('/affects', function(req,res,next){
     }
     });
     next();
+});
+
+router.post('/add-recording', function(req,res,next){
+    var title = req.body.title ? req.body.title.trim() : '';    
+    if( !req.body || !title) return res.json(apiResponse.errors['miss_req_params'])    
+    if( title.length < 3 ) return res.json(apiResponse.errors['minim_string_length'])
+    firebase.database().ref(`recordings`).push({
+        'title': title  
+	}).catch(function(error) {
+			console.log(error);
+		  res.send("error");
+	});
 });
 
 module.exports = router;
