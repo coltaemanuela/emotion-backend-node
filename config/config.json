@@ -1,15 +1,15 @@
 {
     "firebase" : {
-        "apiKey": "AIzaSyD2Ch6ki-gZ98roJx7cj6Rcb2-OY4ZM0vo",
-        "authDomain": "city-match.firebaseapp.com",
-        "databaseURL": "https://city-match.firebaseio.com",
-        "projectId": "city-match",
-        "storageBucket": "city-match.appspot.com",
-        "messagingSenderId": "331136100363"
+        "apiKey":"AIzaSyCpY5IkNa-a1HNMtRWPvObw7uf8wR1KUrE",
+        "authDomain": "voice-sentiment.firebaseapp.com",
+        "databaseURL": "https://voice-sentiment.firebaseio.com",
+        "projectId": "voice-sentiment",
+        "storageBucket": "voice-sentiment.appspot.com",
+        "messagingSenderId": "547615035393"
     },
     "server" : {
-		    "port" : "3000"
-  },
+        "port" : "3000"
+    },
     "empath_API_key": "PhaN4uJClU-qlT6-3XPJIp3oJV7kAmXLxfaASakgVXc",
     "deepaffect_API_key":"Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE",
     "request_id": "1870d981-3c6f-4fab-9c17-d27939be54c3"

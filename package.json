@@ -26,6 +26,7 @@
     "deep-affects": "^0.1.5",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
     "firebase": "^5.0.4",
     "fs": "0.0.1-security",
     "google-cloud": "^0.57.0",
