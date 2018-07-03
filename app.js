@@ -13,9 +13,9 @@ var app = express();
 //setup view engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use('/api', api)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/api', api)
 
 //homepage
 app.get('/', function (req, res) {

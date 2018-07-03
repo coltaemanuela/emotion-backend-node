@@ -6,6 +6,14 @@ var DeepAffects = require('deep-affects');
 var jsonrequest = require('jsonrequest');
 var router = express.Router();
 
+//storage initialization
+var storage = gcloud.storage({
+    projectId:config.firebase.projectId,
+    keyFilename: config.firebase.keyFileName
+  });
+var bucket = storage.bucket(config.firebase.storageBucket);
+
+
 router.get('/affects', function(req,res,next){    
     var defaultClient = DeepAffects.ApiClient.instance;
     // Configure API key authorization: UserSecurity

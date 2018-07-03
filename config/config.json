@@ -5,7 +5,9 @@
         "databaseURL": "https://voice-sentiment.firebaseio.com",
         "projectId": "voice-sentiment",
         "storageBucket": "voice-sentiment.appspot.com",
-        "messagingSenderId": "547615035393"
+        "messagingSenderId": "547615035393",
+        "keyFileName":"voice-sentiment-a2d855ce0859.json",
+        "keyId":"a2d855ce0859359fb676d4a5abaf7562d220e497"
     },
     "server" : {
         "port" : "3000"
