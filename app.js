@@ -40,8 +40,7 @@ app.get('/affects', function(req,res){
   var UserSecurity = defaultClient.authentications['UserSecurity'];
   UserSecurity.apiKey = config.deepaffect_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
-  var body = DeepAffects.Audio.fromFile("./resources/emma.wav"); 
-  console.log(body, typeof(body))
+  var body = DeepAffects.Audio.fromFile("./resources/female600.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav
 
   jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
     if (err) {
