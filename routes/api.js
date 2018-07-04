@@ -16,6 +16,9 @@ var storage = new Storage ({
     projectId:config.firebase.projectId,
     keyFilename: config.firebase.keyFileName
   });
+  
+  //Create custom JSON Web Token
+
 
 router.get('/affects', function(req,res,next){    
     var defaultClient = DeepAffects.ApiClient.instance;
