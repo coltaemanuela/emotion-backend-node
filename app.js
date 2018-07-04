@@ -17,6 +17,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/', general);
 app.use('/api', api)
 app.use(expressValidator({
   errorFormatter: function (param, msg, value) {
@@ -33,23 +34,6 @@ app.use(expressValidator({
 }));
 
 firebase.initializeApp(config.firebase);
-//homepage
-app.get('/', function (req, res) {
-  const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
-  var formData = {
-  apikey: config.empath_API_key,
-  wav: fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
-  };
-
-  request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
-  if (err) 
-    console.trace(err);  
-  var respBody = JSON.parse(response.body);
-  console.log("result: " + JSON.stringify(respBody));
-  res.json(JSON.stringify(respBody));
-  });
-});
-
 
 //server
 app.listen(config.server.port, function () {

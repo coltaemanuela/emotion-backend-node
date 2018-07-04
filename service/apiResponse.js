@@ -54,6 +54,10 @@ module.exports = {
         'duplicate_data' : {
             code    : 513,
             msg     : 'Duplicate data found.'
+        },
+        'validation_errors' : {
+            code    : 514,
+            msg     : 'Missing or incorrect values'
         }
     },
 
