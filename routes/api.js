@@ -1,5 +1,6 @@
 var config = require('../config/config.json');
 var express = require('express');
+var path= require("path");
 var bodyParser = require('body-parser');
 var fs = require("fs");
 var apiResponse = require('../service/apiResponse');
@@ -8,6 +9,7 @@ const Storage = require('@google-cloud/storage');
 var DeepAffects = require('deep-affects');
 var jsonrequest = require('jsonrequest');
 var firebase = require('firebase');
+var multer = require('multer');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
@@ -16,8 +18,37 @@ var storage = new Storage ({
     projectId:config.firebase.projectId,
     keyFilename: config.firebase.keyFileName
   });
+
+// Creates a client
+// const storage = new Storage();
+
+// const bucketName = 'recordigs';
+// const filename = './screenshot.png';
+
+// // Uploads a local file to the bucket
+// storage
+//   .bucket(bucketName)
+//   .upload(filename)
+//   .then(() => {
+//     console.log(`${filename} uploaded to ${bucketName}.`);
+//   })
+//   .catch(err => {
+//     console.error('ERROR:', err);
+//   });
+
+
+router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) {
   
-  //Create custom JSON Web Token
+  var orig = req.files;	
+  debugger
+	const fileObjects = orig.map(currentFile => ({
+	    id: currentFile.filename,
+	    file_name: currentFile.originalname,
+	    mimetype: currentFile.mimetype,
+	    path: currentFile.path+".jpg"
+  }));
+  console.log(fileObjects);
+});
 
 
 router.get('/affects', function(req,res,next){    
@@ -26,7 +57,7 @@ router.get('/affects', function(req,res,next){
     var UserSecurity = defaultClient.authentications['UserSecurity'];
     UserSecurity.apiKey = config.deepaffect_API_key;
     var apiInstance = new DeepAffects.EmotionApi();
-    var body = DeepAffects.Audio.fromFile("./resources/female600.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav. Length:49s
+    var body = DeepAffects.Audio.fromFile("../resources/female600.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav. Length:49s
     jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
     if (err) {
         console.error(err);
