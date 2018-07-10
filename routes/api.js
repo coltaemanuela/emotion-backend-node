@@ -37,36 +37,50 @@ var storage = new Storage ({
 //   });
 
 
-router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) {
-  
+router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) { 
   var orig = req.files;	
-  debugger
 	const fileObjects = orig.map(currentFile => ({
-	    id: currentFile.filename,
-	    file_name: currentFile.originalname,
-	    mimetype: currentFile.mimetype,
-	    path: currentFile.path+".jpg"
+    id: currentFile.filename,
+    file_name: currentFile.originalname,
+    mimetype: currentFile.mimetype,
+    path: currentFile.path+".jpg"
   }));
-  console.log(fileObjects);
+  next();
 });
+
+
+
+router.post('/transcript', function(req,res,next){
+
+  fs.writeFile("transcripts/"+req.body.document_id+".txt", req.body.message, function(err) {
+    if(err) {
+        return console.log(err);
+    }
+  
+    console.log("The file was saved!");
+  }); 
+
+});
+
 
 
 router.get('/affects', function(req,res,next){    
-    var defaultClient = DeepAffects.ApiClient.instance;
-    // Configure API key authorization: UserSecurity
-    var UserSecurity = defaultClient.authentications['UserSecurity'];
-    UserSecurity.apiKey = config.deepaffect_API_key;
-    var apiInstance = new DeepAffects.EmotionApi();
-    var body = DeepAffects.Audio.fromFile("../resources/female600.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav. Length:49s
-    jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
-    if (err) {
-        console.error(err);
-    } else {
-    console.log(data);
-    }
-    });
-    next();
+  var defaultClient = DeepAffects.ApiClient.instance;
+  // Configure API key authorization: UserSecurity
+  var UserSecurity = defaultClient.authentications['UserSecurity'];
+  UserSecurity.apiKey = config.deepaffect_API_key;
+  var apiInstance = new DeepAffects.EmotionApi();
+  var body = DeepAffects.Audio.fromFile("../resources/female600.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav. Length:49s
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
+  if (err) {
+      console.error(err);
+  } else {
+  console.log(data);
+  }
+  });
+  next();
 });
+
 
 router.get('/empath-analysis', function (req, res) {
     const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
