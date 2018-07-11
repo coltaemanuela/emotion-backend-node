@@ -36,6 +36,11 @@ var storage = new Storage ({
 //     console.error('ERROR:', err);
 //   });
 
+router.get('/dummy', function(req,res,next){
+  console.log('dummy route from backend API working');
+  res.json('dummy route from backend API working');
+  next();
+});
 
 router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) { 
   var orig = req.files;	
@@ -55,8 +60,7 @@ router.post('/transcript', function(req,res,next){
   fs.writeFile("transcripts/"+req.body.document_id+".txt", req.body.message, function(err) {
     if(err) {
         return console.log(err);
-    }
-  
+    }  
     console.log("The file was saved!");
   }); 
 
