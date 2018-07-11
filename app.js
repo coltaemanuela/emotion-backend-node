@@ -3,6 +3,8 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var fs = require('fs');
 var https = require('https'); 
+var cors = require('cors')
+
 var request = require('request');
 var firebase = require('firebase');
 var admin = require('firebase-admin');
@@ -13,7 +15,7 @@ var serviceAccount = require("./voice-sentiment-a2d855ce0859.json");
 var general = require('./routes/general');
 var api = require('./routes/api');
 var app = express();
-
+app.use(cors())
 //setup view engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -21,6 +23,15 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
+app.use(function (req, res, next) {
+      res.setHeader('Access-Control-Allow-Origin','*');
+      // res.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:4200'); // for allowing the frontend to connect
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token'); // Request headers to allow  
+      // Set to true if you need the website to include cookies in the requests sent to the API (e.g. in case you use sessions)
+      // res.setHeader('Access-Control-Allow-Credentials', true);  
+      next();
+});
 app.use('/', general);
 app.use('/api', api)
 app.use(expressValidator({
@@ -36,14 +47,6 @@ app.use(expressValidator({
       return msg !== "Invalid value" ? msg : "Missing '" + formParam + "' param or no value";
   }
 }));
-app.use(function (req, res, next) {
-      res.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:4200'); // for allowing the frontend to connect
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // Request headers to allow  
-      // Set to true if you need the website to include cookies in the requests sent to the API (e.g. in case you use sessions)
-      // res.setHeader('Access-Control-Allow-Credentials', true);  
-      next();
-  });
 
 firebase.initializeApp(config.firebase);
 admin.initializeApp({

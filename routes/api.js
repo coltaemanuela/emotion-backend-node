@@ -57,11 +57,13 @@ router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), funct
 
 router.post('/transcript', function(req,res,next){
 
-  fs.writeFile("transcripts/"+req.body.document_id+".txt", req.body.message, function(err) {
+  fs.writeFile("transcripts/"+ req.body.document_id+".txt", req.body.message, function(err) {
     if(err) {
         return console.log(err);
     }  
     console.log("The file was saved!");
+    res.json("The file was saved!");
+    next();
   }); 
 
 });
