@@ -14,20 +14,20 @@ var ffmpeg = require('fluent-ffmpeg');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
-//storage initialization
-var storage = new Storage ({
+//GCP/FIREBASE storage initialization
+var storage1 = new Storage ({
     projectId:config.firebase.projectId,
     keyFilename: config.firebase.keyFileName
   });
 
 // Creates a client
-// const storage = new Storage();
+// const storage1 = new Storage();
 
 // const bucketName = 'recordigs';
 // const filename = './screenshot.png';
 
 // // Uploads a local file to the bucket
-// storage
+// storage1
 //   .bucket(bucketName)
 //   .upload(filename)
 //   .then(() => {
@@ -36,6 +36,16 @@ var storage = new Storage ({
 //   .catch(err => {
 //     console.error('ERROR:', err);
 //   });
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
+  }
+});
+var upload = multer({ storage: storage });
 
 
 router.get('/dummy', function(req,res,next){
@@ -53,6 +63,7 @@ router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), funct
     mimetype: currentFile.mimetype,
     path: currentFile.path+".jpg"
   }));
+  return res.json(apiResponse.success(fileObjects));
   next();
 });
 
@@ -67,19 +78,16 @@ router.post('/transcript', function(req,res,next){
   }); 
 });
 
-
-router.post('/convert-to-wav', multer({ dest: './uploads/'}).single('audio_file'), function(req,res, next){
-  let track1 = req.body.audio_file;   // './source.mp3';
-  console.log(track1);
-  debugger
-  let track = './SampleAudio.mp3';
+//multer({ dest: './uploads/wav_files/'}).single('audio')
+router.post('/convert-to-wav', upload.single('audio'), function(req,res, next){
+  let track = './' + req.file.path;
   ffmpeg(track).toFormat('wav').on('error', (err) => {
-      return res.json(apiResponse.customError(err.message));
+      res.json(apiResponse.customError(err.message));
   }).on('progress', (progress) => {
       console.log('Processing: ' + progress.targetSize + ' KB converted');
   }).on('end', () => {    
-      return res.json(apiResponse.success('Processing finished!'));
-  }).save('./uploads/wav_files/converted.wav');
+      res.json(apiResponse.success('Processing finished!'));
+  }).save('./uploads/wav_files/'+ req.file.originalname+'.wav');
   // next();
 });
 
