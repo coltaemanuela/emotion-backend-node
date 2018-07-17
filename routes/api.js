@@ -37,11 +37,13 @@ var storage = new Storage ({
 //     console.error('ERROR:', err);
 //   });
 
+
 router.get('/dummy', function(req,res,next){
   console.log('dummy route from backend API working');
   res.json('dummy route from backend API working');
   next();
 });
+
 
 router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) { 
   var orig = req.files;	
@@ -54,34 +56,35 @@ router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), funct
   next();
 });
 
+
 router.post('/transcript', function(req,res,next){
   fs.writeFile("transcripts/"+ req.body.document_id+".txt", req.body.message, function(err) {
     if(err) {
-        return console.log(err);
+      return console.log(err);
     }  
-    res.json("The file was saved!");
+    return res.json(apiResponse.success("The transcript file was saved!"));
     next();
   }); 
 });
 
 
-router.post('/convert-to-wav', multer({ dest: './uploads/wav_files'}).array('audio_file', 10), function(req,res, next){
-  let track = req.files;   // './source.mp3';
+router.post('/convert-to-wav', multer({ dest: './uploads/'}).single('audio_file'), function(req,res, next){
+  let track1 = req.body.audio_file;   // './source.mp3';
+  console.log(track1);
+  debugger
+  let track = './SampleAudio.mp3';
   ffmpeg(track).toFormat('wav').on('error', (err) => {
-      // console.log('An error occurred: ' + err.message);
       return res.json(apiResponse.customError(err.message));
   }).on('progress', (progress) => {
       console.log('Processing: ' + progress.targetSize + ' KB converted');
-  }).on('end', () => {
-    // res.json();
-      // console.log('Processing finished!');
+  }).on('end', () => {    
       return res.json(apiResponse.success('Processing finished!'));
-  }).save('./hello.wav')
-  next();
+  }).save('./uploads/wav_files/converted.wav');
+  // next();
 });
 
 
-router.get('/affects', function(req,res,next){    
+router.get('/affects', function(req, res, next) {    
   var defaultClient = DeepAffects.ApiClient.instance;
   // Configure API key authorization: UserSecurity
   var UserSecurity = defaultClient.authentications['UserSecurity'];
@@ -93,10 +96,12 @@ router.get('/affects', function(req,res,next){
       console.error(err);
   } else {
   console.log(data);
+  return res.json(apiResponse.success(data));
   }
   });
   next();
 });
+
 
 router.get('/empath-analysis', function (req, res) {
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
@@ -112,6 +117,7 @@ router.get('/empath-analysis', function (req, res) {
   res.json(JSON.stringify(respBody));
   });
 });
+
 
 router.post('/add-recording', function(req,res,next){
   var title = req.body.title ? req.body.title.trim() : '';    
