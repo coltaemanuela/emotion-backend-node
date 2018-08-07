@@ -12,6 +12,7 @@ var firebase = require('firebase');
 var multer = require('multer');
 var request = require('request');
 var ffmpeg = require('fluent-ffmpeg');
+var base64 = require('file-base64');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
@@ -93,24 +94,27 @@ router.post('/convert-to-wav', upload.single('audio'), function(req,res, next){
   // next();
 });
 
-
-router.post('/affects',upload.single('audio_wav'), function(req, res, next) {    
+router.post('/affects', function(req, res, next) {    
   var defaultClient = DeepAffects.ApiClient.instance;
-  var track = req.file;
-  console.log();
+  var encoded = req.body.encoded;
   // Configure API key authorization: UserSecurity
   var UserSecurity = defaultClient.authentications['UserSecurity'];
   UserSecurity.apiKey = config.deepaffect_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
-  var body = DeepAffects.Audio.fromFile(track.path); //DeepAffects.Audio.fromFile("./resources/speech1.wav");  //source: http://www.signalogic.com/melp/EngSamples/female600.wav. Length:49s
-  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
-    console.log(body);
-      
+  // var body = DeepAffects.Audio.fromFile(track.path);
+  var body1 = {
+    encoding: 'MULAW',
+    sampleRate: 8000,
+    languageCode: 'en-US',
+    content: encoded 
+  };
+
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body1, (err, data) => {
     if (err) {
       console.error(err);
       res.json(apiResponse.customError(err));
     } else {
-    // console.log(data);
+    console.log(data);
       res.json(apiResponse.success(data));
       // next();
     }
