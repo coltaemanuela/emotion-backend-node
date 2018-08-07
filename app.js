@@ -15,6 +15,9 @@ var serviceAccount = require("./voice-sentiment-a2d855ce0859.json");
 var general = require('./routes/general');
 var api = require('./routes/api');
 var app = express();
+var BinaryServer = require('binaryjs').BinaryServer;
+var binaryserver = new BinaryServer({server: app, path: '/binary-endpoint'});
+
 app.use(cors())
 //setup view engine
 app.set('views', path.join(__dirname, 'views'));
@@ -53,6 +56,34 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: config.firebase.databaseURL
 });
+
+
+app.get('/binary-endpoint', function(req,res,next){
+  binaryserver.on('connection', function(client){
+    console.log('Binary Server connection started');
+  
+    client.on('stream', function(stream, meta) {
+      console.log('>>>Incoming audio stream');
+  
+      // broadcast to all other clients
+      for(var id in binaryserver.clients){
+        if(binaryserver.clients.hasOwnProperty(id)){
+          var otherClient = binaryserver.clients[id];
+          if(otherClient != client){
+            var send = otherClient.createStream(meta);
+            stream.pipe(send);
+          } // if (otherClient...
+        } // if (binaryserver...
+      } // for (var id in ...
+  
+      stream.on('end', function() {
+        console.log('||| Audio stream ended');
+      });
+      
+    }); //client.on
+  }); //binaryserver.on
+});
+
 
 //server
 app.listen(config.server.port, function () {

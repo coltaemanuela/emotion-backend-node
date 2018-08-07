@@ -23,6 +23,7 @@
   "homepage": "https://github.com/coltaemanuela/emotion-backend#readme",
   "dependencies": {
     "@google-cloud/storage": "^1.7.0",
+    "binaryjs": "^0.2.1",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "deep-affects": "^0.1.5",
