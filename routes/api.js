@@ -12,7 +12,6 @@ var firebase = require('firebase');
 var multer = require('multer');
 var request = require('request');
 var ffmpeg = require('fluent-ffmpeg');
-var base64 = require('file-base64');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
@@ -116,7 +115,6 @@ router.post('/affects', function(req, res, next) {
     } else {
     console.log(data);
       res.json(apiResponse.success(data));
-      // next();
     }
   });
 });
@@ -127,8 +125,8 @@ router.post('/empath-analysis',upload.single('audio_wav'), function (req, res) {
   
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
   var formData = {
-  apikey: config.empath_API_key,
-  wav: track.path  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
+    apikey: config.empath_API_key,
+    wav:fs.createReadStream( track.path)  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
   };  
   console.log(formData);
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
