@@ -69,6 +69,18 @@ router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), funct
 });
 
 
+router.post("/upload_file", upload.single('audio'),  async (req, res) => {
+  try {
+    var orig1 = req.file;	
+    console.log(req.file.originalname);
+    res.json(apiResponse.success('file uploaded'));
+  }
+  catch(err){
+    res.sendStatus(400);
+  }
+});
+
+
 router.post('/transcript', function(req,res,next){
   fs.writeFile("transcripts/"+ req.body.document_id+".txt", req.body.message, function(err) {
     if(err) {
@@ -101,32 +113,42 @@ router.post('/affects', function(req, res, next) {
   UserSecurity.apiKey = config.deepaffect_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
   // var body = DeepAffects.Audio.fromFile(track.path);
-  var body1 = {
+  var body = {
     encoding: 'MULAW',
     sampleRate: 8000,
     languageCode: 'en-US',
     content: encoded 
   };
 
-  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body1, (err, data) => {
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
     if (err) {
       console.error(err);
       res.json(apiResponse.customError(err));
     } else {
-    console.log(data);
-      res.json(apiResponse.success(data));
+    // console.log(data);
+    var result  = {};
+    data.forEach(entry => {      
+      result[entry.emotion]= entry.score;
+      return result;      
+    });
+    // let arr = Object.values(result);
+    var predominant_emotion= Object.keys(result).reduce((a, b) => result[a] > result[b] ? a : b);    
+    result["predominant_emotion"] = predominant_emotion;
+      res.json(apiResponse.success(result));
     }
   });
 });
 
 
-router.post('/empath-analysis',upload.single('audio_wav'), function (req, res) {
-  var track = req.file;
+router.post('/empath-analysis', /*upload.single('audio_wav'),*/ function (req, res) {
+  // var track = req.file;
+  var file_path = req.body.file_path;
   
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
   var formData = {
     apikey: config.empath_API_key,
-    wav:fs.createReadStream( track.path)  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
+    // wav:fs.createReadStream( track.path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
+    wav:fs.createReadStream( file_path )
   };  
   console.log(formData);
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
