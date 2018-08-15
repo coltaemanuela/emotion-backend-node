@@ -49,13 +49,6 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 
-router.get('/dummy', function(req,res,next){
-  console.log('dummy route from backend API working');
-  res.json('dummy route from backend API working');
-  next();
-});
-
-
 router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) { 
   var orig = req.files;	
 	const fileObjects = orig.map(currentFile => ({
@@ -92,19 +85,6 @@ router.post('/transcript', function(req,res,next){
 });
 
 
-//multer({ dest: './uploads/wav_files/'}).single('audio')
-router.post('/convert-to-wav', upload.single('audio'), function(req,res, next){
-  let track = './' + req.file.path;
-  ffmpeg(track).toFormat('wav').on('error', (err) => {
-      res.json(apiResponse.customError(err.message));
-  }).on('progress', (progress) => {
-      console.log('Processing: ' + progress.targetSize + ' KB converted');
-  }).on('end', () => {    
-      res.json(apiResponse.success('Processing finished!'));
-  }).save('./uploads/wav_files/'+ req.file.originalname+'.wav');
-  // next();
-});
-
 router.post('/affects', function(req, res, next) {    
   var defaultClient = DeepAffects.ApiClient.instance;
   var encoded = req.body.encoded;
@@ -120,35 +100,27 @@ router.post('/affects', function(req, res, next) {
     content: encoded 
   };
 
-  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", body, (err, data) => {
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG", body, (err, data) => {
     if (err) {
       console.error(err);
       res.json(apiResponse.customError(err));
     } else {
-    // console.log(data);
-    var result  = {};
-    data.forEach(entry => {      
-      result[entry.emotion]= entry.score;
-      return result;      
-    });
-    // let arr = Object.values(result);
-    var predominant_emotion= Object.keys(result).reduce((a, b) => result[a] > result[b] ? a : b);    
-    result["predominant_emotion"] = predominant_emotion;
-      res.json(apiResponse.success(result));
+    console.log(data);
+    res.json(apiResponse.success(data));
     }
   });
 });
 
 
-router.post('/empath-analysis', /*upload.single('audio_wav'),*/ function (req, res) {
-  // var track = req.file;
-  var file_path = req.body.file_path;
+router.post('/empath-analysis', upload.single('audio'), function (req, res) {
+  var track = req.file;
+  // var file_path = req.body.file_path;
   
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
   var formData = {
     apikey: config.empath_API_key,
-    // wav:fs.createReadStream( track.path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
-    wav:fs.createReadStream( file_path )
+    wav:fs.createReadStream( track.path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
+    // wav:fs.createReadStream( file_path )
   };  
   console.log(formData);
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
@@ -158,19 +130,6 @@ router.post('/empath-analysis', /*upload.single('audio_wav'),*/ function (req, r
   console.log("result: " + JSON.stringify(respBody));
   res.json(JSON.stringify(respBody));
   });
-});
-
-
-router.post('/add-recording', function(req,res,next){
-  var title = req.body.title ? req.body.title.trim() : '';    
-  if( !req.body || !title) return res.json(apiResponse.errors['miss_req_params'])    
-  if( title.length < 3 ) return res.json(apiResponse.errors['minim_string_length'])
-  firebase.database().ref(`recordings`).push({
-    'title': title  
-	}).catch(function(error) {
-    return res.json(apiResponse.customError(error));		
-  });
-  res.json(apiResponse.success('new recording added successfully'));
 });
 
 module.exports = router;

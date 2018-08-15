@@ -13,6 +13,7 @@
         "port" : "3000"
     },
     "empath_API_key": "PhaN4uJClU-qlT6-3XPJIp3oJV7kAmXLxfaASakgVXc",
-    "deepaffect_API_key":"Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE",
+    "deepaffect_API_key":"Y72YkFQJ6etxIpLyyzWhUqtoEdLOC1KE", 
+    "deepaffect_backup_API_key": "l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG",
     "request_id": "1870d981-3c6f-4fab-9c17-d27939be54c3"
 }
