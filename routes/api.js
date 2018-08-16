@@ -100,7 +100,7 @@ router.post('/affects', function(req, res, next) {
     content: encoded 
   };
 
-  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG", body, (err, data) => {
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=F0GcEbB3wJTGfMnQMtYHenbf3ae6G57T", body, (err, data) => {
     if (err) {
       console.error(err);
       res.json(apiResponse.customError(err));
