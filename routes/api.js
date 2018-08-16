@@ -21,22 +21,6 @@ var storage1 = new Storage ({
     keyFilename: config.firebase.keyFileName
   });
 
-// Creates a client
-// const storage1 = new Storage();
-
-// const bucketName = 'recordigs';
-// const filename = './screenshot.png';
-
-// // Uploads a local file to the bucket
-// storage1
-//   .bucket(bucketName)
-//   .upload(filename)
-//   .then(() => {
-//     console.log(`${filename} uploaded to ${bucketName}.`);
-//   })
-//   .catch(err => {
-//     console.error('ERROR:', err);
-//   });
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -47,19 +31,6 @@ var storage = multer.diskStorage({
   }
 });
 var upload = multer({ storage: storage });
-
-
-router.post("/upload", multer({ dest: './uploads/'}).array('newfile', 10), function(req, res, next) { 
-  var orig = req.files;	
-	const fileObjects = orig.map(currentFile => ({
-    id: currentFile.filename,
-    file_name: currentFile.originalname,
-    mimetype: currentFile.mimetype,
-    path: currentFile.path+".jpg"
-  }));
-  return res.json(apiResponse.success(fileObjects));
-  next();
-});
 
 
 router.post("/upload_file", upload.single('audio'),  async (req, res) => {
@@ -114,13 +85,11 @@ router.post('/affects', function(req, res, next) {
 
 router.post('/empath-analysis', upload.single('audio'), function (req, res) {
   var track = req.file;
-  // var file_path = req.body.file_path;
   
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
   var formData = {
     apikey: config.empath_API_key,
     wav:fs.createReadStream( track.path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
-    // wav:fs.createReadStream( file_path )
   };  
   console.log(formData);
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
@@ -131,5 +100,6 @@ router.post('/empath-analysis', upload.single('audio'), function (req, res) {
   res.json(JSON.stringify(respBody));
   });
 });
+
 
 module.exports = router;
