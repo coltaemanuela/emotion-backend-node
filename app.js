@@ -24,16 +24,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
 app.use(function (req, res, next) {
-      res.setHeader('Access-Control-Allow-Origin','*');
-      // res.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:4200'); // for allowing the frontend to connect
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-      res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token'); // Request headers to allow  
-      // Set to true if you need the website to include cookies in the requests sent to the API (e.g. in case you use sessions)
-      // res.setHeader('Access-Control-Allow-Credentials', true);  
-      next();
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token'); // Request headers to allow  
+  next();
 });
 app.use('/', general);
 app.use('/api', api)
@@ -42,7 +37,6 @@ app.use(expressValidator({
       var namespace = param.split('.')
         , root = namespace.shift()
         , formParam = root;
-
       while (namespace.length) {
           formParam += '[' + namespace.shift() + ']';
       }
@@ -56,34 +50,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: config.firebase.databaseURL
 });
-
-
-app.get('/binary-endpoint', function(req,res,next){
-  binaryserver.on('connection', function(client){
-    console.log('Binary Server connection started');
-  
-    client.on('stream', function(stream, meta) {
-      console.log('>>>Incoming audio stream');
-  
-      // broadcast to all other clients
-      for(var id in binaryserver.clients){
-        if(binaryserver.clients.hasOwnProperty(id)){
-          var otherClient = binaryserver.clients[id];
-          if(otherClient != client){
-            var send = otherClient.createStream(meta);
-            stream.pipe(send);
-          } // if (otherClient...
-        } // if (binaryserver...
-      } // for (var id in ...
-  
-      stream.on('end', function() {
-        console.log('||| Audio stream ended');
-      });
-      
-    }); //client.on
-  }); //binaryserver.on
-});
-
 
 //server
 app.listen(config.server.port, function () {

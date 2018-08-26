@@ -15,6 +15,7 @@ var ffmpeg = require('fluent-ffmpeg');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
+
 //GCP/FIREBASE storage initialization
 var storage1 = new Storage ({
     projectId:config.firebase.projectId,
@@ -27,11 +28,11 @@ var storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
+    cb(null, file.originalname ) //Appending extension + path.extname(file.originalname)
   }
 });
-var upload = multer({ storage: storage });
 
+var upload = multer({ storage: storage });
 
 router.post("/upload_file", upload.single('audio'),  async (req, res) => {
   try {
@@ -56,23 +57,86 @@ router.post('/transcript', function(req,res,next){
 });
 
 
-router.post('/affects', function(req, res, next) {    
+router.post('/affects-v2', function(req, res, next) {    
   var defaultClient = DeepAffects.ApiClient.instance;
-  var encoded = req.body.encoded;
+  var encoded1 = req.body.encoded1;
   // Configure API key authorization: UserSecurity
   var UserSecurity = defaultClient.authentications['UserSecurity'];
-  UserSecurity.apiKey = config.deepaffect_API_key;
+  UserSecurity.apiKey = config.deepaffect_backup_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
   // var body = DeepAffects.Audio.fromFile(track.path);
   var body = {
-    encoding: 'MULAW',
-    sampleRate: 8000,
-    languageCode: 'en-US',
-    content: encoded 
+    encoding: "MULAW",
+    sampleRate: 16000,
+    languageCode: "en-GB",
+    content: encoded1
   };
 
-  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=F0GcEbB3wJTGfMnQMtYHenbf3ae6G57T", body, (err, data) => {
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v2/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG", body, (err, data) => {
     if (err) {
+      console.error(err);
+      res.json(apiResponse.customError(err));
+    } else {
+    console.log(data);
+    res.json(apiResponse.success(data));
+    }
+  });
+});
+// curl -X POST "https://proxy.api.deepaffects.com/audio/generic/api/v2/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG" -H 'content-type: application/json' -d @data.json
+// curl -X POST "https://proxy.api.deepaffects.com/audio/generic/api/v2/async/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG&webhook=http://localhost:4200/&request_id=a37cacc3-71d5-40f0-a329-a051a3949ced" -H 'content-type: application/json' -d @data.json
+// curl -X POST "https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG" -H 'content-type: application/json' -d @data.json
+
+router.post('/affects', function(req, res, next) {    
+  var defaultClient = DeepAffects.ApiClient.instance;
+  var encoded1 = req.body.encoded1;
+  // Configure API key authorization: UserSecurity
+  var UserSecurity = defaultClient.authentications['UserSecurity'];
+  UserSecurity.apiKey = config.deepaffect_backup_API_key;
+  var apiInstance = new DeepAffects.EmotionApi();
+  // var body = DeepAffects.Audio.fromFile(track.path);
+  var body = {
+    encoding: "MULAW",
+    sampleRate: 16000,
+    languageCode: "en-GB",
+    content: encoded1
+  };
+
+  var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+    res.json(apiResponse.customError(err));
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+    res.json(apiResponse.success(data));
+  }
+};
+apiInstance.syncRecogniseEmotion(body, callback);
+
+
+});
+
+
+  router.post('/affects-v1',upload.single('audio_wav'), function(req, res, next) {   
+  var defaultClient = DeepAffects.ApiClient.instance;
+  var track = req.file;
+  console.log(track);
+  // var encoded1 = req.body.encoded1;
+  // Configure API key authorization: UserSecurity
+  var UserSecurity = defaultClient.authentications['UserSecurity'];
+  UserSecurity.apiKey = config.deepaffect_backup_API_key;
+  var apiInstance = new DeepAffects.EmotionApi();
+  var body = DeepAffects.Audio.fromFile(track.path);
+  
+  // var body = DeepAffects.Audio.fromFile('./YAF_yes_disgust.wav');
+  // var body = {
+  //   encoding: "FLAC",
+  //   sampleRate: 16000,
+  //   languageCode: "en-GB",
+  //   content: encoded1
+  // };
+
+  jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG", body,(err, data) => {
+  if (err) {
       console.error(err);
       res.json(apiResponse.customError(err));
     } else {
@@ -83,23 +147,47 @@ router.post('/affects', function(req, res, next) {
 });
 
 
-router.post('/empath-analysis', upload.single('audio'), function (req, res) {
-  var track = req.file;
-  
+router.post('/empath-analysis', function (req, res) {
+  var path = req.body.path;  
   const API_ENDPOINT = 'https://api.webempath.net/v2/analyzeWav';
   var formData = {
     apikey: config.empath_API_key,
-    wav:fs.createReadStream( track.path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
+    wav:fs.createReadStream( path )  //fs.createReadStream("./resources/0wuqx-scsny.wav") //should be .wav format, shouldn't exceed 5s, 1.9MB  and frequency should be 11025 Hz
   };  
   console.log(formData);
+  debugger
   request.post({ url: API_ENDPOINT, formData: formData }, function(err, response) {
+    debugger
   if (err) 
     console.trace(err);  
+  debugger
   var respBody = JSON.parse(response.body);
   console.log("result: " + JSON.stringify(respBody));
   res.json(JSON.stringify(respBody));
   });
 });
 
+router.post('/convert', function(req,res,next){
+  var src = req.body.src;
+  var title = req.body.title;
+  // fs.writeFileSync("./resources/"+title+"-x.wav", Buffer.from(src.replace('data:audio/wav; codecs=opus;base64,', ''), 'base64'));
+  
+  fs.writeFile("./resources/"+title+".wav", src, 'base64', function(data,err) {
+    if(err) console.log(err);
+  else res.json(apiResponse.success("./resources/"+title+".wav"));
+  });
+});
+
+
+router.post('/convert-ffmpeg',upload.single('audio'), function(req,res,next){
+  let track = req.file;
+  ffmpeg('/uploads/'+ track.originalname).toFormat('wav').on('error', (err) => {	  
+      res.json(apiResponse.customError(err.message));	     
+  }).on('progress', (progress) => {
+      console.log('Processing: ' + progress.targetSize + ' KB converted');	      
+  }).on('end', () => {    	  
+     res.json(apiResponse.success('Processing finished!'));	      
+  }).save('./uploads/wav_files/'+ req.body.title +'.wav');	 
+});
 
 module.exports = router;
