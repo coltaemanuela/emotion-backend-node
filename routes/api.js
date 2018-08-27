@@ -15,14 +15,6 @@ var ffmpeg = require('fluent-ffmpeg');
 var expressValidator = require('express-validator');
 var router = express.Router();
 
-
-//GCP/FIREBASE storage initialization
-var storage1 = new Storage ({
-    projectId:config.firebase.projectId,
-    keyFilename: config.firebase.keyFileName
-  });
-
-
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/')
