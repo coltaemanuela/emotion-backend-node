@@ -126,7 +126,8 @@ apiInstance.syncRecogniseEmotion(body, callback);
   UserSecurity.apiKey = config.deepaffect_backup_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
   var body = DeepAffects.Audio.fromFile(track.path);
-  
+  // var encoded = fs.readFileSync(track).toString('base64');
+
   // var body = DeepAffects.Audio.fromFile('./YAF_yes_disgust.wav');
   // var body = {
   //   encoding: "FLAC",
@@ -181,7 +182,7 @@ router.post('/convert', function(req,res,next){
 
 router.post('/convert-ffmpeg',upload.single('audio'), function(req,res,next){
   let track = req.file;
-  ffmpeg('/uploads/'+ track.originalname).toFormat('wav').on('error', (err) => {	  
+  ffmpeg('./uploads/'+ track.originalname).toFormat('wav').on('error', (err) => {	  
       res.json(apiResponse.customError(err.message));	     
   }).on('progress', (progress) => {
       console.log('Processing: ' + progress.targetSize + ' KB converted');	      
