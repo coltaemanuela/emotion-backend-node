@@ -86,6 +86,9 @@ router.post('/affects', function(req, res, next) {
   UserSecurity.apiKey = config.deepaffect_backup_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
   // var body = DeepAffects.Audio.fromFile(track.path);
+  // DeepAffects.Audio.sampleRate = 24414;
+  
+
   var body = {
     encoding: "MULAW",
     sampleRate: 16000,
@@ -103,31 +106,64 @@ router.post('/affects', function(req, res, next) {
   }
 };
 apiInstance.syncRecogniseEmotion(body, callback);
+});
 
 
+router.post('/affects-v3', function(req, res, next) {    
+  var defaultClient = DeepAffects.ApiClient.instance;
+  var path = req.body.path;
+  // Configure API key authorization: UserSecurity
+  var UserSecurity = defaultClient.authentications['UserSecurity'];
+  UserSecurity.apiKey = config.deepaffect_backup_API_key;
+  var apiInstance = new DeepAffects.EmotionApi();
+  var body = DeepAffects.Audio.fromFile('./uploads/wav_files/'+path +'.wav');
+
+  var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+    res.json(apiResponse.customError(err));
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+    res.json(apiResponse.success(data));
+  }
+};
+apiInstance.syncRecogniseEmotion(body, callback);
+});
+
+
+router.post('/denoising', function(req,res,next) {
+
+  var encod = req.body.encod;
+  console.log(req.body);
+  var defaultClient = DeepAffects.ApiClient.instance;
+  var UserSecurity = defaultClient.authentications["UserSecurity"];
+  UserSecurity.apiKey = config.deepaffect_backup_API_key;
+  
+  var apiInstance = new DeepAffects.DenoiseApi();
+  
+  var body = DeepAffects.Audio.fromFile('../data.json'); // {Audio} Audio object
+  
+  var callback = function(error, data, response) {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log("API called successfully. Returned data: " + data);
+    }
+  };
+  apiInstance.syncDenoiseAudio(body, callback);
 });
 
 
   router.post('/affects-v1',upload.single('audio_wav'), function(req, res, next) {   
-  var defaultClient = DeepAffects.ApiClient.instance;
   var track = req.file;
   console.log(track);
-  // var encoded1 = req.body.encoded1;
+  var defaultClient = DeepAffects.ApiClient.instance;  
   // Configure API key authorization: UserSecurity
   var UserSecurity = defaultClient.authentications['UserSecurity'];
   UserSecurity.apiKey = config.deepaffect_backup_API_key;
   var apiInstance = new DeepAffects.EmotionApi();
   var body = DeepAffects.Audio.fromFile(track.path);
   // var encoded = fs.readFileSync(track).toString('base64');
-
-  // var body = DeepAffects.Audio.fromFile('./YAF_yes_disgust.wav');
-  // var body = {
-  //   encoding: "FLAC",
-  //   sampleRate: 16000,
-  //   languageCode: "en-GB",
-  //   content: encoded1
-  // };
-
   jsonrequest("https://proxy.api.deepaffects.com/audio/generic/api/v1/sync/recognise_emotion?apikey=l1W8ZHBa2pSjYbEe0Vxz7e0acaMecFRG", body,(err, data) => {
   if (err) {
       console.error(err);
@@ -160,21 +196,14 @@ router.post('/empath-analysis', function (req, res) {
   });
 });
 
-router.post('/convert', function(req,res,next){
-  var src = req.body.src;
-  var title = req.body.title;
-  // fs.writeFileSync("./resources/"+title+"-x.wav", Buffer.from(src.replace('data:audio/wav; codecs=opus;base64,', ''), 'base64'));
-  
-  fs.writeFile("./resources/"+title+".wav", src, 'base64', function(data,err) {
-    if(err) console.log(err);
-  else res.json(apiResponse.success("./resources/"+title+".wav"));
-  });
-});
-
 
 router.post('/convert-ffmpeg',upload.single('audio'), function(req,res,next){
   let track = req.file;
-  ffmpeg('./uploads/'+ track.originalname).toFormat('wav').on('error', (err) => {	  
+  ffmpeg('./uploads/'+ track.originalname)
+  .audioChannels(1)
+  .withAudioFrequency(44100)  
+  .toFormat('wav')
+  .on('error', (err) => {	  
       res.json(apiResponse.customError(err.message));	     
   }).on('progress', (progress) => {
       console.log('Processing: ' + progress.targetSize + ' KB converted');	      
